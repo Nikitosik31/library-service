@@ -12,6 +12,7 @@ from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingCreateSerializer,
 )
+from notifications.telegram_helper import send_message
 
 
 class BorrowViewSet(viewsets.ModelViewSet):
@@ -29,7 +30,15 @@ class BorrowViewSet(viewsets.ModelViewSet):
             book = serializer.validated_data["book"]
             book.inventory -= 1
             book.save()
-            serializer.save(user=self.request.user)
+            borrowing = serializer.save(user=self.request.user)
+        text = (
+            "📚 New borrowing created!\n\n"
+            f"Borrower: {borrowing.user}\n"
+            f"Book: {borrowing.book.title}\n"
+            f"Borrow date: {borrowing.borrow_date}\n"
+            f"Expected return: {borrowing.expected_return_date}"
+        )
+        send_message(text=text)
 
     def get_queryset(self):
         queryset = Borrowing.objects.all()
