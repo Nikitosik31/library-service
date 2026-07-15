@@ -15,3 +15,5 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
         if not self.request.user.is_staff:
             queryset = queryset.filter(borrowing__user=self.request.user)
         return queryset
+
+

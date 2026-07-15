@@ -13,6 +13,7 @@ from borrowing.serializers import (
     BorrowingCreateSerializer,
 )
 from notifications.telegram_helper import send_message
+from payments.stripe_helper import create_stripe_session
 
 
 class BorrowViewSet(viewsets.ModelViewSet):
@@ -39,9 +40,12 @@ class BorrowViewSet(viewsets.ModelViewSet):
             f"Expected return: {borrowing.expected_return_date}"
         )
         send_message(text=text)
+        create_stripe_session(borrowing)
 
     def get_queryset(self):
-        queryset = Borrowing.objects.all()
+        queryset = Borrowing.objects.select_related(
+            "book", "user"
+        ).prefetch_related("payments")
         user = self.request.user
 
         if not user.is_staff:
