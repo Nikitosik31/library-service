@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from urllib3 import request
 
 from borrowing.models import Borrowing
 from borrowing.serializers import (
@@ -40,7 +41,7 @@ class BorrowViewSet(viewsets.ModelViewSet):
             f"Expected return: {borrowing.expected_return_date}"
         )
         send_message(text=text)
-        create_stripe_session(borrowing)
+        create_stripe_session(borrowing, self.request)
 
     def get_queryset(self):
         queryset = Borrowing.objects.select_related(
