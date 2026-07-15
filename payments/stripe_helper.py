@@ -1,11 +1,12 @@
 import stripe
 from django.conf import settings
+from django.urls import reverse
 
 from borrowing.models import Borrowing
 from payments.models import Payment, Status, Type
 
 
-def create_stripe_session(borrowing: Borrowing):
+def create_stripe_session(borrowing: Borrowing, request):
     days = (borrowing.expected_return_date - borrowing.borrow_date).days
     sum_money = days * borrowing.book.daily_fee
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -22,11 +23,15 @@ def create_stripe_session(borrowing: Borrowing):
             }
         ],
         mode="payment",
-        success_url="http://localhost:8000/success/",
-        cancel_url="http://localhost:8000/cancel/",
+        success_url=request.build_absolute_uri(
+            reverse("payments:payment-success")
+        )
+        + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=request.build_absolute_uri(
+            reverse("payments:payment-cancel")
+        ),
     )
-    print(session.url)
-    print(session.id)
+
     payment = Payment.objects.create(
         status=Status.PENDING,
         type=Type.PAYMENT,
