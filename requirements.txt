@@ -39,6 +39,7 @@ requests==2.34.2
 rpds-py==2026.6.3
 six==1.17.0
 sqlparse==0.5.5
+stripe==15.3.0
 types-PyYAML==6.0.12.20260518
 typing_extensions==4.16.0
 tzdata==2026.3
